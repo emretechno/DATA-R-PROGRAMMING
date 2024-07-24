@@ -1,1 +1,1 @@
-To open the directly html files to see both insructions and code  , please download the zip versions.
+To view the HTML files directly and see both the instructions and code, please download the zip versions.
