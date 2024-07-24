@@ -1,0 +1,49 @@
+---
+title: "Data Programming"
+subtitle: "Homework 5"
+author: "Yusuf Emre Kilicer"
+student_number: 76230071
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+# IMPORTING DATA
+
+```{r}
+
+# Read the file as lines
+file_path <- "/Users/y.emrekilicer/Desktop/DATA KONU PROJE ODEV/DATA HW5/dataset.csv"
+lines <- readLines(file_path)
+
+# Read the header row to get the correct column names
+header <- read.csv(file_path, header = FALSE, nrows = 1, stringsAsFactors = FALSE)
+col_names <- unlist(header)
+
+# Read the data starting from the second row
+my_dataset <- tryCatch({
+  data <- read.csv(file_path, header = FALSE, skip = 1, sep = ",", fill = TRUE, stringsAsFactors = FALSE, col.names = col_names)
+  
+  # Remove columns that are entirely NA or empty
+  data <- data[, colSums(is.na(data)) < nrow(data)]
+  data <- data[, colSums(data != "") > 0]
+
+  data
+}, error = function(e) {
+  cat("Error:", e$message, "\n")
+  NULL
+})
+
+if (!is.null(my_dataset)) {
+  print(my_dataset)
+} else {
+  cat("Failed to load the dataset.\n")
+}
+
+```

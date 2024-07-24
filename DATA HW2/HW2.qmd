@@ -1,0 +1,170 @@
+---
+title: "Data Programming"
+subtitle: "Homework 2"
+author: "Yusuf Emre Kilicer"
+student_number: 76230071
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+THE LIBRARIES THAT I NEED FOR SOLUTIONS
+
+```{r}
+
+library(tibble)
+
+```
+
+## LET'S ANSWER THE QUESTIONS
+
+Firstly , I'll read the data from csv type of the file.
+Seperator type is ",' , that's why I am also indicating this while reading.
+
+```{r}
+
+my_data <-read.csv("/Users/y.emrekilicer/Desktop/DATA HW2/msft.csv",sep=",")
+
+```
+
+There is no problem !.
+
+Then ,let me parse the date column into a date.
+
+1-) Display the dataframe as tibble
+```{r}
+#I am manipulating the data format type as day /  month /  year.
+
+my_data$Date <- lubridate :: dmy(my_data$Date) # for day month year format.
+
+
+my_data_tibble <-my_data %>% as_tibble()
+my_data_tibble
+```
+
+Now ,let's find out that How long has the data been collected.
+As you wrote , I took care of "Na" situations by using na.rm =T condition.
+
+```{r}
+
+
+#FIRST COLLECT THE DATES FROM THE my_data by using $ operator.
+
+dates <- my_data$Date
+
+#Then find the oldest and newest date to substract them.
+#Time difference will be our answer.
+
+duration <- max(dates,na.rm = T ) - min(dates, na.rm =T)
+
+#We found the total time of collecting.Let's print it.
+
+print(duration)
+
+```
+
+
+Then , let's solve the 3. question : Among the highest rated apps return the 10 apps (rows) with the highest amount of reviews. Display only the first 3 columns.
+
+```{r}
+
+
+#Using order function with "-"  because I want to  order the number of people rate  from highest to lowest ; not from lowest to highest(which order function does from lowest to highest if we dont use  "-".) 
+
+highest_to_lowest_num_of_review <- my_data[order(-my_data$No.of.people.Rated),]
+
+#After filtered the highest , then I will order the rating from highest to lowest by using order function with "-" again.As I said before , I am ordering from highest to lowest.
+
+first_10_highest_rated <-highest_to_lowest_num_of_review[order(-highest_to_lowest_num_of_review$Rating),]
+
+
+#After I order as expected , then I will choose first 10 of them.As expected , first 10 is ready now.
+first_10_highest_rated <- first_10_highest_rated[1:10, ]
+
+#The last thing is printing only the first 3 columns.Now I also arrange the first 3 column condition.
+first_10_highest_rated <- first_10_highest_rated[, 1:3]
+
+#Then it is time to print.
+print(first_10_highest_rated)
+
+```
+
+Now, I will show the number of apps created per month.
+
+```{r}
+
+# Firstly , I will extract month from Date column
+
+extract_months<- format(my_data$Date, "%m")
+# Then ,I will create a table of counts for each month
+
+monthly_counts <- table(extract_months)
+
+# I am converting the result to a data frame
+
+
+monthly_counts_df <- data.frame(Month = (names(monthly_counts)), Count = as.numeric(monthly_counts))
+
+#I am  Initializing counts for months 1 to 12, initially set to 1
+
+counts <- 1:12
+#I shouldn't forget to sum the NA values.
+na_count = sum(is.na(extract_months)) # I learnt this function on searching.We may also calculate by loop.
+
+# Then I will update  counts for months with data !
+
+counts[1:12] <- monthly_counts_df$Count
+
+#Don't forget to add NA count !
+
+# Combine counts with NA count and total count because we will  print also NA column.
+
+output <- c(counts, na_count)
+
+matrix_out <- matrix(output, nrow =1)
+# Set the column names
+
+colnames(matrix_out) <- c(1:12, NA)
+
+df <- as.data.frame(matrix_out)
+
+# Print the data frame without row names for expected output
+
+print(df, row.names = FALSE)
+```
+
+
+
+Solving the last question : Sort the rows of the dataframe from the least wordy to most wordy app name. Display the first 15.
+
+```{r}
+
+
+# I am sorting the data frame based on the length of the app names.
+
+# Here, I use the str_count function to calculate the number of characters in each app name  and then order the data frame based on these lengths.
+
+my_data_sorted <- my_data[order(stringr :: str_count(my_data$Name)), ]
+
+#Here, I'm displaying the first 15 rows of the sorted data frame my_data_sorted using the head()
+
+my_data_sorted_top15 <- my_data_sorted[1:15,]
+my_data_sorted_top15
+
+#or we could have directly used head(my_data_sorted, 15) function
+
+```
+
+The questions are answered fully. 
+
+Best Regards.
+
+Emre
+
+

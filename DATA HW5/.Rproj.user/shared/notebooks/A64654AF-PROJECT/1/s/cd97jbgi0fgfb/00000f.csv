@@ -1,0 +1,13 @@
+"0","# Create a new feature for activity levels"
+"0","my_data <- my_data %>%"
+"0","  mutate("
+"0","    activity_level = case_when("
+"0","      faf == 0 ~ ""No Activity"","
+"0","      faf < 1 ~ ""Low Activity"","
+"0","      faf < 3 ~ ""Moderate Activity"","
+"0","      TRUE ~ ""High Activity"""
+"0","    )"
+"0","  )"
+"2","Error in my_data %>% mutate(activity_level = case_when(faf == 0 ~ ""No Activity"",  : 
+  could not find function ""%>%""
+"

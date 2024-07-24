@@ -1,0 +1,333 @@
+---
+title: "Data Programming"
+subtitle: "PROJECT"
+author: "Yusuf Emre Kilicer"
+student_number: 76230071
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+    bibliography: references.bib
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+# <font color="RED">***WELCOME TO MY*** PROJECT</font>
+
+## [<font color="GREEN"> NOW TIME TO DO <font color="BLUE"> THE P]{.underline}ROJECT</font> [ON QUARTO</font>]{.underline}
+
+### <font color = "BROWN">[***INTRODUCTION***]{.underline}</font>
+
+*Obesity is a complex and multifactorial condition that has become a major public health concern worldwide. According to the World Health Organization (WHO), obesity has nearly tripled since 1975. This document aims to provide a comprehensive analysis of obesity-related data to uncover insights and trends that can inform public health strategies. The dataset used in this analysis is sourced from \[Kaggle's Obesity Dataset\](https://www.kaggle.com/datasets)*
+
+### <font color = "BROWN">[***DATA OVERVIEW***]{.underline}</font>
+
+### Below are the libraries necessary for this Project.
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(DT) #datatable()
+library(gt)
+
+```
+
+### <font color="BROWN">[***IMPORTING DATASET***]{.underline}</font>
+
+#### Let's start with loading the data first.
+
+```{r}
+my_data <-read.csv("/Users/y.emrekilicer/Desktop/DATA KONU PROJE ODEV/DATA HW4/ObesityDataSet_raw_and_data_sinthetic.csv")
+
+
+```
+
+### <font color="BROWN">[***GENERAL OVERVIEW***]{.underline}</font>
+
+```{r}
+#BEFORE START ANYTHING , THE DATA WILL BE PRINTED AS DATATABLE.
+
+my_data %>%
+  datatable(
+    caption="THE GENERAL OVERVIEW OF IMPORTED DATA",
+    options = list(
+      pageLength = 4,
+      autoWitdh = TRUE
+    ))
+```
+
+### <font color="BROWN">[***ADDITIONAL FIGURE***]{.underline} </font>
+
+<details>
+
+<summary><font color="BLUE">***NOTE!!: TO SEE A FIGURE FOR DETAILED INFORMATION ABOUT THE COLUMNS, CLICK HERE***</font></summary>
+
+![Detailed Column Information](/Users/y.emrekilicer/Desktop/Unknown.jpg)
+
+<details>
+
+### <font color="BROWN">[***FIRST INFERENCE***]{.underline}</font>
+
+<font color="BLUE">When we observe the columns, we can infer that obesity is affected by many factors such as age, gender, smoking, etc. The relationships between these factors and their effects on obesity will be explained and shown. </font>
+
+### <font color="BROWN">[***DATA CLEANING***]{.underline}</font>
+
+```{r}
+# Clean and standardize column names to lowercase and remove special characters for consistency
+my_data <- janitor::clean_names(my_data)
+# Identify and display duplicated rows if any exist
+#Let's show a few of them if there is .
+duplicated_df <- my_data[duplicated(my_data) | duplicated(my_data, fromLast = TRUE), ]
+duplicated_df %>%
+  head(6) %>%
+  knitr::kable(caption = "Duplicated Rows")
+
+# Remove duplicated rows using the distinct function
+prev_num_rows <- nrow(my_data)
+my_data <- distinct(my_data)
+new_num_rows <- nrow(my_data)
+
+message <- paste("The number of rows has been updated to ", new_num_rows, ". Previously, it was ", prev_num_rows, ".", sep="")
+cat(message, "\n")
+
+# Check for missing values in the dataset
+if (any(is.na(my_data))) {
+  cat("Warning: The dataset contains missing values. Please handle them with caution.\n")
+} else {
+  cat("There are no missing values in the dataset.\n")
+}
+```
+
+### <font color="BROWN">[***OBESITY LEVELS AND FAMILY HISTORY***]{.underline}</font>
+
+NOT : To see the obesity classification by BMI , click the @tbl-obesity
+
+*Understanding the relationship between obesity levels and family history of overweight can provide insights into genetic and environmental factors contributing to obesity.*
+
+### <font color="BROWN">[***ANALYSIS OF FAMILY HISTORY***]{.underline}</font>
+
+```{r}
+#I want to show relation between family history with overweight relation and obesity level.
+
+ relations<-my_data %>%
+  group_by(n_obeyesdad, family_history_with_overweight) %>%
+  summarise(count = n())
+  
+ 
+ relations %>%
+  datatable(caption = "Counts of Obesity Levels by Family History",options = list(pageLength = 13))
+
+#As we can see, people who are overweight or have more weight than normal often have a relationship with their families overweight.
+```
+
+```{r}
+#LET'S ALSO VISUALIZE THIS :
+
+#| label: fig-ggplot
+#| fig-cap: ggplot
+
+ggplot(relations, aes(x = family_history_with_overweight, y = count, fill = n_obeyesdad)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = round(count, 2)), position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(
+    title = "Obesity Levels by Family History of Overweight",
+    x = "Family History of Overweight",
+    y = "Count",
+    fill = "Obesity Level"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+*Research indicates that individuals who are overweight or have higher-than-average body weight often have family members who are also overweight, suggesting a familial or genetic link to weight issues.This graphic is kind of proof of this.*
+
+See : @fig-ggplot
+
+### <font color="BROWN">[***BMI CALCULATION AND***]{.underline} [***ANALYSIS***]{.underline} </font>
+
+Body Mass Index (BMI) is a commonly used measure to classify overweight and obesity in adults
+
+[To understand what is BMI , please click here](https://www.cdc.gov/healthyweight/assessing/bmi/index.html "DETAILED EXPLANATION OF BMI")
+
+I think ~~everyone~~ knows the formula of BMI.Let me write it again :
+
+$$\textit{BMI} = \frac{\textbf{Weight}}{\textbf{Height}^{2}}$$
+
+and the units can be expressed as :
+
+$$\frac{\textcolor{red}{\textit{kg}}}{\textcolor{red}{\textit{m}^{2}}}$$
+
+### <font color="BROWN">[*ADDING BMI TO THE DATASET*]{.underline} </font>
+
+| Category           | BMI       |
+|--------------------|-----------|
+| Underweight        | \<18.5    |
+| Normal weight      | 18.5-24.9 |
+| Overweight         | 25.0-29.9 |
+| Obesity( Class I ) | 30.0-34.9 |
+| Obesity(Class II)  | 35-39.9   |
+| Obesity(Class III) | \>40      |
+
+: Table showing classification of Obesity using the Body Mass Index (BMI) {#tbl-obesity}
+
+See @tbl-obesity
+
+```{r}
+#Now , it is time to add new features to our dataset.
+#First , let's calculate the BMI of every person.
+  
+calc_bmi <- \(dataset) {
+      dataset %>%
+      mutate(BMI = weight  / (height * height) )
+  
+}
+
+my_data <- calc_bmi(my_data) 
+
+#Let's check if it was added as new column.
+my_data %>% 
+        head(5) %>%
+        datatable()
+
+```
+
+```{r}
+# Group by obesity level and summarize mean BMI and age
+  obesity_summary <- my_data %>%
+    group_by(n_obeyesdad) %>%
+    summarise(
+      mean_BMI = mean(BMI),
+      mean_age = mean(age),
+      total_num = n()
+    )
+
+  obesity_summary %>%
+    datatable(caption = "Summary Statistics by Obesity Level")
+  
+```
+
+### <font color="BROWN">[*OBESITY LEVEL AND BMI DISTRIBUTION*]{.underline} </font>
+
+```{r}
+#Visualization
+# Create the density plot
+
+
+ggplot(my_data, aes(x = BMI, fill = n_obeyesdad)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Distribution of BMI by Obesity Level",
+    x = "BMI",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+```
+
+[*This density plot highlights how BMI values are distributed across various obesity levels, providing a clear visualization of the BMI ranges corresponding to each category.*]{.underline}
+
+### <font color="BROWN">[*CREATING NEW FEATURE : AGE GROUP*]{.underline} </font>
+
+```{r}
+# Create a new feature: Age group
+
+my_data <- my_data %>%
+  mutate(
+    age_group = case_when(
+      age < 20 ~ "Teenager",
+      age < 35 ~ "Young Adult",
+      age < 50 ~ "Middle Age",
+      TRUE ~ "Senior"
+    )
+  )
+
+
+# Group by age group and summarize mean BMI
+age_group_summary <- my_data %>%
+  group_by(age_group) %>%
+  summarise(
+    mean_BMI = mean(BMI),
+    mean_weight = mean(weight),
+    count = n()
+  )
+
+# Display the age group summary
+age_group_summary %>%
+  datatable(caption = "Summary Statistics by Age Group")
+```
+
+### <font color="BROWN"> VISUALIZATION </font>
+
+```{r}
+# Plot mean BMI by age group
+table(my_data$age_group)
+ ggplot(my_data, aes(x = age_group, y = BMI, fill = age_group)) +
+  geom_violin(alpha = 1) +
+  labs(
+    title = "Graph of BMI by Age Group",
+    x = "Age Group",
+    y = "BMI"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ 
+ 
+```
+
+```{r}
+my_data <- my_data %>%
+  mutate(fcvc = case_when(
+    fcvc <1.6 ~ "Never",
+    fcvc <2.3 ~ "Sometimes",
+    .default = "Always"
+  ))
+
+  
+st <-my_data %>%
+   group_by(n_obeyesdad,fcvc,favc) %>%
+   summarize(count = n())
+```
+
+```{r}
+ggplot(st, aes(x = count, y = n_obeyesdad, fill = n_obeyesdad)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(fcvc ~ favc) + #rows for fcvc , columns with facv
+  labs(
+    title = "Relations With High Calorie Eater , Vegetable Frequency, and Obesity Levels",
+    subtitle = "                                     DO YOU EAT HIGH CALORIE FOOD ?",
+    y= "The frequency of eating vegetable",
+    x = "Total Number",
+    fill = "Obesity Level"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    axis.text.y= element_text(angle = 30, hjust = 1,size=8),
+    legend.position = "bottom"
+  )
+```
+
+## <font color="RED">***CONCLUSION***</font>
+
+*Obesity is a multifaceted issue influenced by various factors, including genetics, physical activity, and eating habits. Through this analysis, we have highlighted key insights and trends that can help inform public health strategies. Further research and intervention are necessary to address this growing public health concern effectively.*
+
+------------------------------------------------------------------------
+
+Hyperlink
+
+**You can find more information on obesity on the [World Health Organization's website](https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight).**
+
+## <font color="RED">***REFERENCES FROM references.bib***</font>
+
+-   World Health Organization. Obesity and overweight. Retrieved from [WHO](https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight)[@who2021obesity].
+
+-   [@smith2019obesity]
+
+-   Brown, L., & Green, M. (2020). The impact of family history on obesity: A review. *Journal of Obesity Research*, 22(3), 234-245.[@brown2020family]
+
+-   <https://www.kaggle.com/datasets>

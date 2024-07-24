@@ -1,0 +1,163 @@
+---
+title: "Data Programming"
+subtitle: "Homework 3"
+author: "Yusuf Emre Kilicer"
+student_number: 76230071
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+## 
+
+HOMEWORK 3
+
+The libraries that I need for this homework:
+
+```{r}
+library(ggplot2)
+library(tibble)
+
+```
+
+Now , we can start to solve the question one by one.Let me start with the first task. I will draw a line chart with ggplot of temperature over time side by side for the 2 the build-in data frames.
+
+```{r}
+beaver1$beaver <- "Beaver 1"
+beaver2$beaver <- "Beaver 2"
+combined_data <- rbind(beaver1, beaver2)
+
+# Plotting
+#December 1990 12-13 for beaver 1
+#November 3-4 for beaver 2
+ combined_data$time <- as.character(combined_data$time)
+    
+    # Create a function to convert time to datetime
+    time_to_datetime <- function(day, time) {
+      # Convert day to date
+      date <- as.Date("1990-01-01") + day - 1
+      # Convert time to hours and minutes
+      hour <- as.integer(substr(time, 1, 2))
+      minute <- as.integer(substr(time, 3, 4))
+      # Combine date, hour, and minute into datetime
+      datetime <- as.POSIXct(paste(date, hour, minute, sep = " "), format = "%Y-%m-%d %H %M")
+      return(datetime)
+    }
+    
+    # Apply the function to create a new column 'datetime'
+    combined_data$datetime <- time_to_datetime(combined_data$day, combined_data$time)
+ggplot(combined_data, aes(x = datetime, y = temp, color = beaver)) +
+  geom_line() +
+  facet_grid(. ~ beaver, scales = "free_x", space = "free_x") +
+  labs(title = "Temperature Over Time for Beaver 1 and Beaver 2",
+       y = "Temperature (°C)") +
+  theme_minimal()
+
+```
+
+Now , let me continue with second task.
+
+```{r}
+# Task 2
+#Let's see what is datasets::euro looks like.
+print( datasets::euro )
+
+  convert.all <- function(amount_of_money , currency_of ="EUR"){ #EUR is default currency.
+                                                                 #If no parameter is given , it will  be EUR.
+    
+
+             rates <- c(EUR = 1, ATS = 13.760300, BEF = 40.339900, DEM = 1.955830, 
+             ESP = 166.386000, FIM = 5.945730, FRF = 6.559570, IEP = 0.787564, 
+             ITL = 1936.270000, LUF = 40.339900, NLG = 2.203710, PTE = 200.482000)
+             
+             #I created a vector which contains the rates of the currencies.
+  
+   
+    if(!is.numeric(amount_of_money)){
+      
+      stop("The amount of money should be numeric!")
+      
+    }  #If the amount of money is not numeric , it will give an error.
+             
+
+    if(is.numeric(currency_of)){
+      
+      stop("The currency should be string!")
+      
+    } #If the currency is numeric , it will give an error.
+      
+      if(length(amount_of_money)==0){
+        
+        stop("The amount of money should not be empty!")
+        
+      } #If the amount of money is empty , it will give an error.)
+             
+
+     currency_of <- toupper(currency_of)
+     
+     #I converted the currency to uppercase.
+     
+     
+     convert_to_eur <- function(amount_money , current_currency){
+        
+       if(current_currency %in% names(rates)){
+        
+        return (amount_money/rates[current_currency])
+
+       }else{
+         
+         return (0)
+         
+       }
+       
+     }
+       #I created a function which converts the given currency to EUR.
+    
+       total_amounts <- tapply(amount_of_money, names(amount_of_money), sum)
+        #I calculated the total amount of money for each currency otherwise duplicated currencies will be summed.
+       
+       result_with_eur_curr<- sum(sapply(names(total_amounts) , function(x) convert_to_eur(total_amounts[x] , x)))
+     if (currency_of =="EUR"){
+       
+      return  (result_with_eur_curr)
+     }
+     #If the currency is EUR , it will return the sum of the converted amount of money.
+     
+     else if(currency_of %in% names(rates)){
+       
+     return  ( sum((result_with_eur_curr) * rates[currency_of]) )
+       
+    
+    
+        }
+     #If the currency is not EUR , first I will find the amount of euro currency and then multiplying with the rate of the given        currency.
+    #If I don't use sum() , it also prints the name of the currency.
+     else{
+       
+       return(0);
+       
+     }
+     
+   
+  }
+  
+  convert.all(c(EUR=6.5))
+  
+  convert.all(c(EUR=3,ATS=2))
+  
+  convert.all(c(EUR=3,EUR=2))
+  
+  convert.all(c(EUR=3,DEM=2,SIT=10000),"EUR")
+  
+  convert.all(c(EUR=3,SIT=10000,DEM=2),"ESP")
+  
+  convert.all(c(EUR=3,DEM=2,LIRA=100),"SIT")
+
+
+```

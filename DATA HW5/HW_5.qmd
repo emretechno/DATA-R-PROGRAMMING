@@ -1,0 +1,110 @@
+---
+title: "Data Programming"
+subtitle: "Homework 5"
+author: "Yusuf Emre Kilicer"
+student_number: 76230071
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+# LIBRARIES
+
+```{r}
+
+
+library(knitr) #kable function
+library(DT)
+library(dplyr)
+library(ggplot2)
+library(janeaustenr)
+library(tibble)
+library(stringr)
+library(purrr)
+library(tidytext)
+library(gganimate)
+
+
+
+
+
+```
+
+```{r}
+
+
+
+books <-austen_books()
+nrow(books)
+unique(books$book)
+
+books |>
+  select(book) |>
+   distinct()
+
+
+
+
+
+words <- str_split(df$text, pattern = "[[:space:][:punct:]]+") %>%
+  unlist() %>%
+  tibble(word = .) %>%
+  filter(nchar(word) > 0) %>%
+  mutate(w_length = nchar(word)) %>%
+  filter(w_length == 5) %>%
+  head(10) 
+df |>
+
+  head()
+  
+
+word <- "monday"
+
+result <-list()
+
+for( i in 1:nchar(word)){
+  result[[i]] <- str_sub(word,-i,-i)
+}
+ st <-result |> list_c()
+paste0(st,collapse = "")
+
+isPalindrome <- function(word){
+  r1 <- str_split(word,pattern = "") |>
+    unlist() |>
+    rev()
+  return ( word == paste(r1,collapse = ""))
+  
+}
+library(readxl)
+import <-read_xlsx("challenge.xlsx",sheet = 3,skip=10) |> janitor::clean_names()
+
+
+import  |>
+  mutate(id = row_number()) |>
+  relocate(id , .before = "sr_12")
+
+ggplot(economics) +
+  geom_line(aes(x=date  , y=unemploy)) +
+  transition_reveal(along = date() )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+```

@@ -1,0 +1,590 @@
+---
+title: "DATA PROGRAMMING"
+subtitle: "PROJECT"
+author: "Yusuf Emre Kilicer"
+student_number: 76230071
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+tutorial 9 'da netlifye yukleme komutlari var oradan bakarsin.
+
+::: panel-tabset
+## EN
+
+Hello , I am *Yusuf Emre Kilicer*.My project topic is mostly about Obesity.I hope you like my project.
+
+[**KING REGARDS**]{.underline}
+
+**EMRE**
+
+## SLO
+
+Pozdravljeni, sem *Yusuf Emre Kiličer* . Moj projekt se večinoma ukvarja s prekomerno telesno težo. Upam, da vam je všeč moj projekt.
+
+**KRALJEVI POZDRAVI**
+
+**EMRE**
+:::
+
+<details>
+
+<summary>🤫 ADMISSION (click to expand) 🙈 !</summary>
+
+I used google translate for greeting Slovenian.
+
+[Thus , I don't know if it was translated correctly...]{.underline}
+
+</details>
+
+# <font color="RED">***WELCOME TO MY*** **PROJECT**</font>
+
+## [<font color="GREEN"> NOW TIME TO SHOW MY <font color="BLUE"> MASTERY OF R]{.underline} </font> [LANGUAGE </font>]{.underline}
+
+### <font color="BROWN">[***IMPORTING LIBRARIES***]{.underline}</font>
+
+Below are the libraries necessary for this project:
+
+```{r}
+
+library(tibble)
+library(knitr)
+library(dplyr)
+library(janitor)
+library(tidyverse)
+library(ggplot2)
+library(DT)
+
+
+
+```
+
+### <font color="BROWN">[***IMPORTING DATASET***]{.underline}</font>
+
+#### Let's start with loading the data first.
+
+```{r}
+my_data <-read.csv("/Users/y.emrekilicer/Desktop/DATA KONU PROJE ODEV/DATA PROJE/ObesityDataSet_raw_and_data_sinthetic.csv")
+
+```
+
+Now , let's see what do we get.
+
+```{r}
+#BEFORE START ANYTHING , THE DATA WILL BE PRINTED AS DATATABLE.
+
+
+#NOTE THAT EVERY NECESSARY INFORMATION ABOUT COLUMNS, UNITS,COLUMN NUMBERS ETC WILL BE PRINTED LATER.THIS IS JUST FOR CHECKING IF DATA IMPORTED CORRECTLY.
+
+my_data %>%
+  datatable(
+    caption="THE GENERAL OVERVIEW OF IMPORTED DATA",
+    options = list(
+      pageLength = 7,
+      autoWitdh = TRUE
+    ))
+```
+
+### <font color="BROWN">[***DATA CLEANING***]{.underline}</font>
+
+Before starting the data manipulation, it is crucial to ensure no duplicated rows or missing values exist in the dataset.
+
+```{r}
+
+# Clean and standardize column names to lowercase and remove special characters for consistency
+my_data <- clean_names(my_data)
+
+# Identify and display duplicated rows if any exist
+duplicated_df <- my_data[duplicated(my_data) | duplicated(my_data, fromLast = TRUE), ]
+duplicated_df %>%
+  head(6) %>%
+  kable(caption = "Duplicated Rows")
+
+# Remove duplicated rows using the distinct function
+prev_num_rows <- nrow(my_data)
+my_data <- distinct(my_data)
+new_num_rows <- nrow(my_data)
+
+message <- paste("The number of rows has been updated to ", new_num_rows, ". Previously, it was ", prev_num_rows, ".", sep="")
+cat(message, "\n")
+
+# Check for missing values in the dataset
+if (any(is.na(my_data))) {
+  cat("Warning: The dataset contains missing values. Please handle them with caution.\n")
+} else {
+  cat("There are no missing values in the dataset.\n")
+}
+
+
+```
+
+### <font color="BROWN">GENERAL OVERVIEW</font>
+
+```{r}
+
+
+my_data <- clean_names(my_data)
+
+# Retrieve and print the column names and their data types.
+column_information <- my_data %>%
+                      sapply(class) %>%
+                      as.data.frame() %>%
+                      rownames_to_column(var = "Column Name") %>%
+                      rename(Class = 2)
+
+# Display the columns and their classes in a table.
+column_information %>%
+  datatable(caption = "Column Names and Their Classes",options= list(  pageLength=10,
+autoWidth =TRUE
+  ))
+
+
+```
+
+<details>
+
+<summary><font color="BLUE">***NOTE!!: TO SEE A DETAILED INFORMATION ABOUT THE COLUMN , CLICK HERE***</font></summary>
+
+![Detailed Column Information](/Users/y.emrekilicer/Desktop/Unknown.jpg)
+
+```{r}
+
+cat(paste("The number of columns is ", ncol(my_data)))
+cat(paste("The number of rows is ", nrow(my_data)))
+
+# Display the first 10 rows of our data for a preview.
+my_data %>%
+  head(10) %>%
+  kable(format = "html", caption = "The Obesity DataSet Raw and Synthetic Data")
+
+
+```
+
+### <font color="BROWN">[*DEEPING INTO DATASET*]{.underline} </font>
+
+```{r}
+
+
+# Calculate descriptive statistics only for numeric columns in the dataframe my_data
+additional_manipulate <- my_data %>%
+  # Apply summary functions across all numeric columns
+  summarise(across(
+    where(is.numeric),  # Apply the functions only to numeric columns
+    list(
+      count = ~length(.),  # Count total values
+      mean = ~mean(.),  # Calculate mean
+      std = ~sd(.),  # Calculate standard deviation
+      min = ~min(.),  # Find minimum value
+      `25%` = ~quantile(., probs = 0.25),  # 25th percentile
+      `50%` = ~median(.),  # Median
+      `75%` = ~quantile(., probs = 0.75),  # 75th percentile
+      max = ~max(.)  # Find maximum value
+    )
+  )) %>%
+  # Keep data in a long format for clarity
+  pivot_longer(
+    cols = everything(), 
+    names_to = c("Column", ".value"), 
+    names_pattern = "(.*)_(.*)"
+  )
+
+# Output the descriptive statistics table
+
+additional_manipulate %>%
+  kable()
+```
+
+-   *Based on the dataset description, it's known that 77% of the data was synthetically generated using the Weka tool and the SMOTE filter, while the remaining 23% was directly collected from users through a web platform.*
+
+-   [**Click to learn organic -synthetic data**](https://www.omnilert.com/blog/truth-ai-training-organic-vs-synthetic)
+
+```{r}
+
+# Group the organic from synthetic data based on the dataset description.
+df_organic <- my_data[1:488, ]
+df_synthetic <- my_data[489:nrow(my_data), ]
+
+# Display samples from both subsets to understand their characteristics.
+cat("Last 3 rows of Organic Data\n")
+kable(tail(df_organic, 3), caption = "Organic Data - Last 3 Rows")
+
+cat("First 3 rows of Synthetic Data\n")
+kable(head(df_synthetic, 3), caption = "Synthetic Data - First 3 Rows")
+
+```
+
+```{r}
+
+
+
+# Analyze and visualize the most common ages, weights, genders 
+#and heights in the dataset.
+
+total_of_group <- function(data, group_of, top_n) {
+  
+  result_table <- data %>%
+    group_by({{ group_of }}) %>%
+    summarize(Count = n()) %>%
+    arrange(desc(Count)) %>%
+    top_n(top_n, wt = Count)
+  
+  
+  
+  # Calculate peak values
+  peak_values <- result_table %>%
+    mutate(ranking = row_number())
+   
+  
+  ggplot(result_table, aes(x = reorder({{ group_of }}, -Count), y = Count)) +
+    geom_bar(stat = "identity", fill = "yellow", color = "black") +
+    geom_text(aes(label = Count), vjust = -0.5, size = 3) +  
+    geom_line(data = peak_values, aes(group = 1, x = reorder({{ group_of }}, -Count), y = Count), color = "red") +
+    labs(title = paste("Most Common", deparse(substitute(group_of))), x = deparse(substitute(group_of)), y = "Count")
+    
+}
+
+
+# Let's visualize the ages and also weights.
+total_of_group(my_data, age, 12)
+
+total_of_group(my_data, weight, 12)
+
+total_of_group(my_data, gender, 12)
+
+
+
+```
+
+<details>
+
+<summary><font color="BLUE">NOTE ! : TO SEE THE GRAPHICS OF OTHER COLUMNS , JUST CLICK HERE.</font></summary>
+
+```{r}
+
+total_of_group(my_data, height, 12)
+
+total_of_group(my_data,mtrans,6)
+
+total_of_group(my_data,calc,7)
+
+
+
+```
+
+</details>
+
+```{r}
+
+
+# Overview the distribution of obesity levels.
+# Density plot for distribution of obesity levels
+obesity_levels_plot <- ggplot(my_data, aes(x = n_obeyesdad, fill = n_obeyesdad)) +
+  geom_density(alpha = 0.5) +  # Density plot
+  labs(title = "Distribution of Obesity Levels", x = "Obesity Level", y = "Density") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(obesity_levels_plot)
+
+
+
+```
+
+#### ***To see the percentages , let's print another graphic***.
+
+```{r}
+
+# Calculate the percentage of each obesity level
+data <- my_data %>%
+  count(n_obeyesdad) %>%
+  mutate(percentage = n / sum(n) * 100)
+
+#The colour codes was written by using geekforgeeks website.I took help.
+custom_colors <- c("Normal_Weight" = "#E41A1C", "Overweight_Level_I" = "#377EB8", "Overweight_Level_II" = "#4DAF4A",
+                   "Obesity_Type_I" = "#984EA3", "Obesity_Type_II" = "#FF7F00", "Obesity_Type_III" = "#FFFF33", "Insufficient_Weight" = "#A65628")
+
+# Create the pie chart
+ggplot(data, aes(x = "", y = percentage, fill = n_obeyesdad)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y", start = pi) +  # Start at 180 degrees
+  scale_fill_manual(values = custom_colors) +
+  labs(fill = "OBESITY LEVELS") +
+  theme_void() +  # Remove background and axis
+  geom_text(aes(label = sprintf("%.2f%%", percentage)), 
+            position = position_stack(vjust = 0.5), size = 5) +
+  theme(legend.title = element_text(size = 15), 
+        legend.text = element_text(size = 12))
+
+
+```
+
+### <font color="BROWN">[***DATA MANIPULATION***]{.underline}</font>
+
+[To understand what is BMI , please click here](https://www.cdc.gov/healthyweight/assessing/bmi/index.html "DETAILED EXPLANATION OF BMI")
+
+I think ~~everyone~~ knows the formula of BMI.Let me write it again :
+
+$$
+BMI = \frac{Weight}{Height^{2}}
+$$
+
+```{r}
+
+
+#Now , it is time to add new features to our dataset.
+#First , let's calculate the BMI of every person.
+  
+calc_bmi <- \(dataset) {
+      dataset %>%
+      mutate(BMI = weight  / (height * height) )
+  
+}
+
+my_data <- calc_bmi(my_data) 
+
+#Let's check if it was added as new column.
+my_data %>% 
+        head(5) %>%
+        datatable()
+
+
+```
+
+```{r}
+
+
+#I want to show relation between family history with overweight relation and obesity level.
+
+ relations<-my_data %>%
+  group_by(n_obeyesdad, family_history_with_overweight) %>%
+  summarise(count = n())
+  
+ 
+ 
+ relations %>%
+  datatable(caption = "Counts of Obesity Levels by Family History",options = list(pageLength = 13))
+
+#As we can see, people who are overweight or have more weight than normal often have a relationship with their families overweight.
+  
+```
+
+```{r}
+#LET'S ALSO VISUALIZE THIS :
+
+ggplot(relations, aes(x = family_history_with_overweight, y = count, fill = n_obeyesdad)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = round(count, 2)), position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(
+    title = "Obesity Levels by Family History of Overweight",
+    x = "Family History of Overweight",
+    y = "Count",
+    fill = "Obesity Level"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+```{r}
+
+# Group by obesity level and summarize mean BMI and age
+  obesity_summary <- my_data %>%
+    group_by(n_obeyesdad) %>%
+    summarise(
+      mean_BMI = mean(BMI),
+      mean_age = mean(age),
+      total_num = n()
+    )
+  
+  
+  obesity_summary %>%
+    datatable(caption = "Summary Statistics by Obesity Level")
+  
+
+```
+
+```{r}
+
+#Visualization
+ggplot(obesity_summary , aes(
+                        x = n_obeyesdad,
+                        y=mean_BMI,
+                        fill = n_obeyesdad))+
+  geom_bar(stat="identity",position = "dodge")+
+  geom_text(aes(label = round(mean_age, 2)), vjust = -0.5, position = position_dodge(width = 1)) +
+  ylab("Mean of age ") +
+  ggtitle("Mean BMI by Obesity Level") +
+  labs(title = "mean of AGE over bmi",
+       x="Obesity Level",
+       y="Mean of BMI ")+
+  scale_y_continuous(breaks = seq(0, max(obesity_summary$mean_BMI), by = 5)) +
+  theme(axis.text.x=element_text(angle=45,hjust=1))
+
+```
+
+```{r}
+# Rearrange columns to move BMI to the front
+my_data <- my_data %>%
+  relocate(BMI, .after = age)
+
+# Display the rearranged data
+my_data %>%
+  head(5) %>%
+  datatable(caption = "Data with BMI Column Relocated")
+
+```
+
+```{r}
+
+# Create a new feature: Age group
+
+my_data <- my_data %>%
+  mutate(
+    age_group = case_when(
+      age < 20 ~ "Teenager",
+      age < 35 ~ "Young Adult",
+      age < 50 ~ "Middle Age",
+      TRUE ~ "Senior"
+    )
+  )
+
+
+# Group by age group and summarize mean BMI
+age_group_summary <- my_data %>%
+  group_by(age_group) %>%
+  summarise(
+    mean_BMI = mean(BMI),
+    mean_weight = mean(weight),
+    count = n()
+  )
+
+# Display the age group summary
+age_group_summary %>%
+  datatable(caption = "Summary Statistics by Age Group")
+
+```
+
+\]
+
+```{r}
+
+# Plot mean BMI by age group
+table(my_data$age_group)
+ ggplot(my_data, aes(x = age_group, y = BMI, fill = age_group)) +
+  geom_violin(alpha = 1) +
+  labs(
+    title = "Graph of BMI by Age Group",
+    x = "Age Group",
+    y = "BMI"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+```{r}
+
+# Distribution of BMI by obesity level
+ggplot(my_data, aes(x = BMI, fill = n_obeyesdad)) +
+  geom_density(alpha = 0.8) +
+  labs(
+    title = "Distribution of BMI by Obesity Level",
+    x = "BMI",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+# Scatter plot of weight vs. height colored by obesity level
+ggplot(my_data, aes(x = height, y = weight, color = n_obeyesdad)) +
+  geom_point(alpha = 1) +
+  labs(
+    title = "Weight vs. Height by Obesity Level",
+    x = "Height",
+    y = "Weight"
+  ) 
+
+
+```
+
+```{r}
+# Additional multi-line plot for summary statistics
+obesity_summary_long <- obesity_summary %>%
+  pivot_longer(cols = c(mean_BMI, mean_age, total_num), 
+               names_to = "variable", 
+               values_to = "value")
+
+ggplot(obesity_summary_long, aes(x = n_obeyesdad, y = value, color = variable, group = variable)) +
+  geom_line(size = 1) +  # Draw lines
+  geom_point(size = 3) +  # Add points
+  labs(
+    title = "Summary Statistics by Obesity Level",
+    x = "Obesity Level",
+    y = "Value",
+    color = "Variable"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+
+
+
+# Visualize the distribution of various eating habits by obesity level
+eating_habits_summary <- my_data %>%
+  pivot_longer(cols = c(fcvc, ncp, ch2o), names_to = "habit", values_to = "frequency") %>%
+  group_by(n_obeyesdad, habit, frequency) %>%
+  summarise(count = n(), .groups = 'drop')
+
+ggplot(eating_habits_summary, aes(x = factor(frequency), y = count, fill = n_obeyesdad)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ habit, scales = "free_y") +
+  labs(
+    title = "Distribution of Eating Habits by Obesity Level",
+    x = "Frequency",
+    y = "Count",
+    fill = "Obesity Level"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# Create a new feature for activity levels
+my_data <- my_data %>%
+  mutate(
+    activity_level = case_when(
+      faf == 0 ~ "No Activity",
+      faf < 1 ~ "Low Activity",
+      faf < 3 ~ "Moderate Activity",
+      TRUE ~ "High Activity"
+    )
+  )
+
+# Display the new feature
+my_data %>%
+  select(faf, activity_level) %>%
+  head(10) %>%
+  datatable(caption = "Sample Data with Activity Levels")
+
+# Visualize the distribution of activity levels by obesity level
+activity_summary <- my_data %>%
+  group_by(n_obeyesdad, activity_level) %>%
+  summarise(count = n(), .groups = 'drop')
+
+ggplot(activity_summary, aes(x = activity_level, y = count, fill = n_obeyesdad)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Activity Levels by Obesity
+
+
+```

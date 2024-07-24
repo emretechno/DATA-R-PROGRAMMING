@@ -1,0 +1,201 @@
+---
+title: "Data Programming"
+subtitle: "Homework 3"
+author: "Yusuf Emre Kilicer"
+student_number: 76230071
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+# HOMEWORK 3
+
+The libraries that I need for this homework:
+
+```{r}
+
+library(tidyverse)
+
+```
+
+*Now , we can start to solve the question one by one.Let me start with the first task. I will draw a line chart with ggplot of temperature over time side by side for the 2 the build-in data frames.*
+
+```{r}
+
+beaver1$beaver <- "beaver 1"
+beaver2$beaver <- "beaver 2"
+
+
+combined_data <- rbind(beaver1, beaver2)
+
+#combined the data frames for beaver1 and beaver2
+#To see what is combined_data looks like , I used head() function.
+
+combined_data <- combined_data[, c("day", "time", "temp", "beaver")]
+
+#Let's see what did we get after combining the data frames.
+combined_data |>
+  as_tibble()
+
+ 
+       class(combined_data$time)
+        
+    # Create a function to convert time to datetime
+    
+      time_to_datetime <-  \(day, time) {
+      # Convert day to date
+        
+      date <- as.Date("1990-01-01") + day - 1
+      
+      #convert time to hour and minute
+      hour <- time %/% 100
+      minute <- time %% 100
+      
+      datetime <- as.POSIXct(paste(date, hour, minute, sep = " "), format = "%Y-%m-%d %H %M")
+      
+      return(datetime)
+      }
+
+    # Apply the function to create a new column 'datetime'
+    combined_data$datetime <- time_to_datetime(combined_data$day,combined_data$time)
+     
+    # Plotting
+
+  ggplot(data=combined_data, aes(x = datetime, y = temp, color = beaver)) +
+  geom_line() +
+  facet_grid(.~ beaver, scales = "free_x",space="free_y") +
+  #free_x and free_y are used to make the scales of the x and y axes independent.
+  
+  labs(title = "Temperature of beavers over time",
+       x="",
+       y = "Temperature (°C)")+
+       scale_x_datetime(date_breaks = "4 hours", date_labels =        "%b %d %H:%M")
+  #I divided the x axis into 4 hours intervals and I showed the date and hour of the data.
+
+
+#The date of graph were not running correctly.This is the 
+#closest solution that I could find.
+#I hope that it is not a big problem.
+
+```
+
+**Now , let me continue with second task.**
+
+```{r}
+# Task 2
+#Let's print to see how does datasets euro dataset look like.
+
+
+print( datasets::euro )
+
+  convert.all <- \(amount_of_money,currency_of="EUR") { #EUR is default currency.
+                                                        #If no parameter is given , it will  be EUR.
+
+             rates <- c(EUR = 1, ATS = 13.760300, BEF = 40.339900, DEM = 1.955830, 
+             ESP = 166.386000, FIM = 5.945730, FRF = 6.559570, IEP = 0.787564, 
+             ITL = 1936.270000, LUF = 40.339900, NLG = 2.203710, PTE = 200.482000)
+             
+             #I created a vector which contains the rates of the currencies.
+  
+   
+    if(!is.numeric(amount_of_money)){
+      
+      stop("The amount of money should be numeric!")
+      
+    }  #If the amount of money is not numeric , it will give an error.
+             
+
+    if(is.numeric(currency_of)){
+      
+      stop("The currency should be string!")
+      
+    } #If the currency is numeric , it will give an error.
+      
+      if(length(amount_of_money)==0){
+        
+        stop("The amount of money should not be empty!")
+        
+      } #If the amount of money is empty , it will give an error.)
+             
+
+     currency_of <- toupper(currency_of)
+     
+     #I converted the currency to uppercase in case of the user enters the currency in lowercase.
+     
+     #Helper function to convert the given currency to EUR.
+     
+     convert_to_eur <- \(amount_money , current_currency) {
+        
+       if(current_currency %in% names(rates)){
+        
+        return (amount_money/rates[current_currency]) #Eur conversion which is default currency.
+
+       }else{
+         
+         return (0)
+         
+       }
+       
+     }
+       #I created a function which converts the given currency to EUR.
+       
+        
+         total_amounts <- tapply(amount_of_money, names(amount_of_money), sum)
+        #I calculated the total amount of money for each currency otherwise duplicated currencies will be            summed which leads wrong result.
+       
+       result_of_eur_conversion<- sum(sapply(names(total_amounts) , function(x) convert_to_eur(total_amounts[x] , x)))
+     if (currency_of =="EUR"){
+       
+      return  (result_of_eur_conversion)
+     }
+     #If the currency is EUR , it will return the sum of the converted amount of money.
+     
+     else if(currency_of %in% names(rates)){
+       
+     return  ( sum((result_of_eur_conversion) * rates[currency_of]) )
+       
+         #If the currency is not EUR , first I will find the amount of euro currency and then multiplying             with the rate of the given currency.
+    
+        }
+
+     else{
+       
+       return(0);
+       
+     }
+     
+   
+  }
+  
+  
+  convert.all(c(EUR=6.5))
+  
+  convert.all(c(EUR=3,ATS=2))
+  
+  convert.all(c(EUR=3,EUR=2))
+  
+  convert.all(c(EUR=3,DEM=2,SIT=10000))
+
+  
+  convert.all(c(EUR=3,DEM=2,SIT=10000),"EUR")
+  
+  convert.all(c(EUR=3,SIT=10000,DEM=2),"ESP")
+  
+  convert.all(c(EUR=3,DEM=2,LIRA=100),"SIT")
+
+
+```
+
+# All questions were answered.
+*Have a nice day.* 
+
+$King  Regards$ 
+
+**Yusuf Emre Kilicer**
+

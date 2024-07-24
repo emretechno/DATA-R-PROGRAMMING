@@ -1,0 +1,1 @@
+{"frames":[{"func":"total_of_group(my_data, age, 12)","file":"","line_number":0,"end_line_number":0,"character_number":0,"end_character_number":0}],"message":"Error in data %>% group_by({ : could not find function \"%>%\"\n"}
