@@ -1,0 +1,87 @@
+---
+title: "Data Programming"
+subtitle: "Homework 1"
+author: "Yusuf Emre Kilicer"
+date: "`r format(Sys.time(), '%e %B %Y')`"
+format: 
+  html:
+    embed-resources: true
+execute: 
+  warning: false
+  messages: false
+  echo: true
+  error: true
+---
+
+## This file both include source code and outputs as expected.
+
+```{r}
+#Loading some necessary libraries.
+library(knitr)
+library(gt)
+library(tidyverse)
+library(DT)
+library(dplyr)
+```
+
+Let's create our database first.
+
+1.  <div>
+
+    ```{r}
+
+    library(DT)
+    mtcars %>% datatable(caption= "Selamlar",options = list(
+       pageLength = 5,
+       autoWidth = TRUE
+    ))
+
+
+    #Loading some necessary libraries.
+    library(knitr)
+    library(gt)
+    library(tidyverse)
+    library(DT)
+    library(dplyr)
+
+
+    x <- as.POSIXct("11th April 2012 14:21:24", format = "%dth %B %Y %H:%M:%S")
+    y <- as.POSIXct("24th April 2023 11:59:59", format = "%dth %B %Y %H:%M:%S")
+
+    # Calculate the difference in seconds
+    difference_seconds <- difftime(y, x, units = "secs")
+    difference_seconds
+
+    rs <- iris %>% group_by(Species) %>% summarise(medians = median(Petal.Length)) %>%
+          arrange(desc(medians)) %>%head(1) %>%select(Species)
+    rs
+
+
+    ggplot(mpg, aes(x = displ, y = hwy)) +
+      geom_point() +
+      geom_smooth(method = "lm")
+
+
+    mtcars %>%head(10) %>%datatable()
+
+    sl <- mtcars %>%  filter(hp == max(hp)) %>%rownames()
+    sl
+    sl <- mtcars %>% filter(cyl==4) %>% summarise(meann = mean(mpg))
+
+    ggplot(mtcars,  aes(x = mpg , y=  hp)) +
+      geom_point()
+
+
+    data(AirPassengers)
+
+
+    AirPassengers
+
+    pass<-data.frame(passengers = AirPassengers, ind = 1:length(AirPassengers)) %>% 
+        mutate(month = rep_along(ind, 1:12))
+    pass %>%as_tibble()
+
+
+    ```
+
+    </div>
